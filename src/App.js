@@ -1,46 +1,38 @@
 import React, { Component, Suspense } from 'react';
-import { BrowserRouter, Route, NavLink } from 'react-router-dom';
 import User from './containers/User';
-import Welcome from './containers/Welcome';
 
 // here default imports are compulsory, named imports will not work. 
 // when react thinks that we need the component, it executes this arrow function, 
-// and them import gives us the componnet dynamically.  
+// and them import gives us the component dynamically.  
 const Posts = React.lazy( () => import('./containers/Posts') );
 
-class App extends Component {
+class App extends Component { 
+
+  state = {
+    showPosts : false
+  }
+
+  toggleHandler = () => {
+    this.setState( (prevState) => {
+      return { showPosts : !prevState.showPosts}
+    } );
+  }
+
   render() {
+    // here we show how to use Lazy loading in conditional rendering. 
     return (
-      <BrowserRouter>
-        <React.Fragment>
-          <nav>
-            <NavLink to="/user">User Page</NavLink> |&nbsp;
-            <NavLink to="/posts">Posts Page</NavLink>
-          </nav>
-
-          <Route path="/" component={Welcome} exact />
-          <Route path="/user" component={User} />
-
-          {/* 
-          rather than using component prop, we need to use the render method. 
-          we have to return the component inside the Suspense component. 
-          */}
-          <Route 
-            path="/posts" 
-            render={
-              () => (
-                /**
-                 * fallback is required if react postpones the rendering of the 
-                 * component as it may take time to download the new code. 
-                 */
-                <Suspense fallback = {<div>Loading..</div>}>
-                  <Posts/>
-                </Suspense>
-              )
-           } />
-
-        </React.Fragment>
-      </BrowserRouter>
+      <React.Fragment>
+        <button onClick = {this.toggleHandler } >Toggle content</button>
+        {
+          this.state.showPosts ? 
+            (
+              <Suspense fallback = {<div>Loading...</div>}>
+                <Posts/>
+              </Suspense>
+            ) :
+              <User/>
+        }
+      </React.Fragment>
     );
   }
 }
